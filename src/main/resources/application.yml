@@ -1,0 +1,7 @@
+logging:
+  pattern:
+    console: "%d - %msg%n"
+  #  file:
+  #    path: /var/log/tomcat/
+  level:
+    com.imooc.LoggerTest: debug
