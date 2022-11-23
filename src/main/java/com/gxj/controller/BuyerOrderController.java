@@ -6,6 +6,7 @@ import com.gxj.dto.OrderDTO;
 import com.gxj.enums.ResultEnum;
 import com.gxj.exception.SellException;
 import com.gxj.form.OrderForm;
+import com.gxj.service.BuyerService;
 import com.gxj.service.OrderService;
 import com.gxj.utils.ResultVOUtil;
 import com.mysql.cj.util.StringUtils;
@@ -29,6 +30,9 @@ public class BuyerOrderController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private BuyerService buyerService;
 
     @PostMapping("/create")
     public ResultVO<Map<String, String>> create(@Valid OrderForm orderForm, BindingResult bindingResult){
@@ -60,5 +64,19 @@ public class BuyerOrderController {
         PageRequest request = PageRequest.of(page, size);
         Page<OrderDTO> orderDTOPage = orderService.findList(openid, request);
         return ResultVOUtil.success(orderDTOPage.getContent());
+    }
+
+    @GetMapping("/detail")
+    public ResultVO<OrderDTO> detail(@RequestParam("openid") String openid,
+                                     @RequestParam("orderId") String orderId) {
+        OrderDTO orderDTO = buyerService.findOrderOne(openid, orderId);
+        return ResultVOUtil.success(orderDTO);
+    }
+
+    @PostMapping("/cancel")
+    public ResultVO cancel (@RequestParam("openid") String openid,
+                            @RequestParam("orderId") String orderId) {
+        buyerService.cancelOrder(openid, orderId);
+        return ResultVOUtil.success();
     }
 }
