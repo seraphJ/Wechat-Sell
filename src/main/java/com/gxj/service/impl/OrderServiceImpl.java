@@ -13,6 +13,7 @@ import com.gxj.exception.SellException;
 import com.gxj.repository.OrderDetailRepository;
 import com.gxj.repository.OrderMasterRepository;
 import com.gxj.service.OrderService;
+import com.gxj.service.PayService;
 import com.gxj.service.ProductService;
 import com.gxj.utils.KeyUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderMasterRepository orderMasterRepository;
 
+    @Autowired
+    private PayService payService;
+
     @Override
     @Transactional
     public OrderDTO create(OrderDTO orderDTO) {
@@ -68,6 +72,8 @@ public class OrderServiceImpl implements OrderService {
         orderMaster.setOrderAmount(orderAmount);
         orderMaster.setOrderStatus(OrderStatusEnum.NEW.getCode());
         orderMaster.setPayStatus(PayStatusEnum.WAIT.getCode());
+        //TODO openid写死
+        orderMaster.setBuyerOpenid("oTgZpwaPfCy81yYGSxnWPocur3KI");
         orderMasterRepository.save(orderMaster);
         List<CartDTO> cartDTOList = orderDTO.getOrderDetailList().stream().map(e ->
                 new CartDTO(e.getProductId(), e.getProductQuantity())).collect(Collectors.toList());
@@ -125,7 +131,7 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList());
         productService.increaseStock(cartDTOList);
         if (orderDTO.getPayStatus().equals(PayStatusEnum.SUCCESS.getCode())) {
-            //TODO
+            payService.refund(orderDTO);
         }
 
         return orderDTO;

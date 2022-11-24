@@ -69,6 +69,8 @@ public class BuyerOrderController {
     @GetMapping("/detail")
     public ResultVO<OrderDTO> detail(@RequestParam("openid") String openid,
                                      @RequestParam("orderId") String orderId) {
+        //TODO openid写死
+        openid = "oTgZpwaPfCy81yYGSxnWPocur3KI";
         OrderDTO orderDTO = buyerService.findOrderOne(openid, orderId);
         return ResultVOUtil.success(orderDTO);
     }
@@ -76,6 +78,8 @@ public class BuyerOrderController {
     @PostMapping("/cancel")
     public ResultVO cancel (@RequestParam("openid") String openid,
                             @RequestParam("orderId") String orderId) {
+        //TODO 写死openid
+        openid = "oTgZpwaPfCy81yYGSxnWPocur3KI";
         buyerService.cancelOrder(openid, orderId);
         return ResultVOUtil.success();
     }

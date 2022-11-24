@@ -17,7 +17,8 @@ public class OrderForm {
     @NotEmpty(message = "地址必填")
     private String address;
 
-    @NotEmpty(message = "openid必填")
+    //TODO openid写死
+//    @NotEmpty(message = "openid必填")
     private String openid;
 
     @NotEmpty(message = "购物车不能为空")
