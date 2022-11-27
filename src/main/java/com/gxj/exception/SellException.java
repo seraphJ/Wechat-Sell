@@ -1,7 +1,9 @@
 package com.gxj.exception;
 
 import com.gxj.enums.ResultEnum;
+import lombok.Getter;
 
+@Getter
 public class SellException extends  RuntimeException{
     private Integer code;
     public SellException(ResultEnum resultEnum) {

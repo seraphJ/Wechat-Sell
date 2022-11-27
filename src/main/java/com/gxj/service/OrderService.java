@@ -11,5 +11,5 @@ public interface OrderService {
     OrderDTO cancel(OrderDTO orderDTO);
     OrderDTO finish(OrderDTO orderDTO);
     OrderDTO paid(OrderDTO orderDTO);
-
+    Page<OrderDTO> findList(Pageable pageable);
 }

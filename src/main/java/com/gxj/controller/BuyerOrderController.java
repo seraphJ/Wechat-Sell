@@ -78,7 +78,7 @@ public class BuyerOrderController {
     @PostMapping("/cancel")
     public ResultVO cancel (@RequestParam("openid") String openid,
                             @RequestParam("orderId") String orderId) {
-        //TODO 写死openid
+        //TODO openid写死
         openid = "oTgZpwaPfCy81yYGSxnWPocur3KI";
         buyerService.cancelOrder(openid, orderId);
         return ResultVOUtil.success();

@@ -12,9 +12,7 @@ import com.gxj.enums.ResultEnum;
 import com.gxj.exception.SellException;
 import com.gxj.repository.OrderDetailRepository;
 import com.gxj.repository.OrderMasterRepository;
-import com.gxj.service.OrderService;
-import com.gxj.service.PayService;
-import com.gxj.service.ProductService;
+import com.gxj.service.*;
 import com.gxj.utils.KeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -33,7 +31,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class OrderServiceImpl implements OrderService {
+public class  OrderServiceImpl implements OrderService {
     @Autowired
     private ProductService productService;
 
@@ -45,6 +43,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private PayService payService;
+
+    @Autowired
+    private PushMessageService pushMessageService;
+
+    @Autowired
+    private WebSocket webSocket;
 
     @Override
     @Transactional
@@ -78,6 +82,8 @@ public class OrderServiceImpl implements OrderService {
         List<CartDTO> cartDTOList = orderDTO.getOrderDetailList().stream().map(e ->
                 new CartDTO(e.getProductId(), e.getProductQuantity())).collect(Collectors.toList());
         productService.decreaseStock(cartDTOList);
+
+        webSocket.sendMessage(orderDTO.getOrderId());
         return orderDTO;
     }
 
@@ -152,6 +158,7 @@ public class OrderServiceImpl implements OrderService {
             log.error("【完结订单】更新失败, orderMaster={}", orderMaster);
             throw new SellException(ResultEnum.ORDER_UPDATE_FAIL);
         }
+        pushMessageService.orderStatus(orderDTO);
         return orderDTO;
     }
 
@@ -175,5 +182,12 @@ public class OrderServiceImpl implements OrderService {
             throw new SellException(ResultEnum.ORDER_UPDATE_FAIL);
         }
         return orderDTO;
+    }
+
+    @Override
+    public Page<OrderDTO> findList(Pageable pageable) {
+        Page<OrderMaster> orderMasterPage = orderMasterRepository.findAll(pageable);
+        List<OrderDTO> orderDTOList = OrderMaster2OrderDTOConverter.convert(orderMasterPage.getContent());
+        return new PageImpl<OrderDTO>(orderDTOList, pageable, orderMasterPage.getTotalElements());
     }
 }
