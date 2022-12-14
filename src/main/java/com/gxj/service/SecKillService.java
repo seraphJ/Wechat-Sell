@@ -8,6 +8,7 @@ public interface SecKillService {
      * @return
      */
     String querySecKillProductInfo(String productId);
+    String querySecKillProductInfo();
 
     /**
      * 模拟不同用户秒杀同一商品的请求

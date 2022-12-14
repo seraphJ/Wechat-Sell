@@ -25,8 +25,9 @@ public class BuyerProductController {
     private ProductService productService;
     @Autowired
     private CategoryService categoryService;
-    @GetMapping("/list")
 
+    @GetMapping("/list")
+//    @Cacheable(cacheNames = "product", key = "123")
     public ResultVO list() {
         List<ProductInfo> productInfoList = productService.findUpAll();
 //        //传统方法

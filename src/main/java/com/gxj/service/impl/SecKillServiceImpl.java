@@ -1,10 +1,14 @@
 package com.gxj.service.impl;
 
 import com.gxj.exception.SellException;
+import com.gxj.service.RedisLock;
 import com.gxj.service.SecKillService;
 import com.gxj.utils.KeyUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,13 +16,15 @@ import java.util.Map;
  * Created by 廖师兄
  * 2017-08-06 23:18
  */
+
 @Service
+@Slf4j
 public class SecKillServiceImpl implements SecKillService {
 
-    private static final int TIMEOUT = 10 * 1000; //超时时间 10s
+    @Autowired
+    private RedisLock redisLock;
 
-//    @Autowired
-//    private RedisLock redisLock;
+    private static final int TIMEOUT = 10 * 1000; //超时时间 10s
 
     /**
      * 国庆活动，皮蛋粥特价，限量100000份
@@ -34,8 +40,19 @@ public class SecKillServiceImpl implements SecKillService {
         products = new HashMap<>();
         stock = new HashMap<>();
         orders = new HashMap<>();
-        products.put("123456", 100000);
-        stock.put("123456", 100000);
+        products.put("111111", 100000);
+        products.put("222222", 100000);
+        products.put("333333", 100000);
+        products.put("444444", 100000);
+        products.put("555555", 100000);
+        products.put("666666", 100000);
+
+        stock.put("111111", 100000);
+        stock.put("222222", 100000);
+        stock.put("333333", 100000);
+        stock.put("444444", 100000);
+        stock.put("555555", 100000);
+        stock.put("666666", 100000);
     }
 
     private String queryMap(String productId)
@@ -47,16 +64,45 @@ public class SecKillServiceImpl implements SecKillService {
                 +  orders.size() +" 人" ;
     }
 
+    private String queryMap()
+    {
+        int sells = 0;
+        for (String productId : Arrays.asList("111111", "222222", "333333", "444444", "555555", "666666")) {
+            sells += products.get(productId) - stock.get(productId);
+        }
+        return "国庆活动，皮蛋粥特价，销量"
+                + sells
+                +" 份"
+                +" 该商品成功下单用户数目："
+                +  orders.size() +" 人" ;
+    }
+
     @Override
     public String querySecKillProductInfo(String productId)
     {
         return this.queryMap(productId);
     }
 
+    public String querySecKillProductInfo()
+    {
+        return this.queryMap();
+    }
+
     @Override
     public void orderProductMockDiffUser(String productId)
     {
-        //加锁
+//        加锁
+        long time = System.currentTimeMillis() + TIMEOUT;
+        while (!redisLock.lock(productId, String.valueOf(time))) {
+            time = System.currentTimeMillis() + TIMEOUT;
+        }
+
+
+
+//        if (!redisLock.lock(productId, String.valueOf(time))) {
+//            log.info("【redis分布式锁】未抢到锁{}", System.currentTimeMillis());
+//            throw new SellException(101, "哎呦喂，人也太多了");
+//        }
 
         //1.查询该商品库存，为0则活动结束。
         int stockNum = stock.get(productId);
@@ -76,6 +122,6 @@ public class SecKillServiceImpl implements SecKillService {
         }
 
         //解锁
-
+        redisLock.unlock(productId, String.valueOf(time));
     }
 }
